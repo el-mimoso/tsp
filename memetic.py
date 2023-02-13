@@ -6,9 +6,10 @@ import matplotlib.pyplot as plt
 
 
 class City:
-    def __init__(self, x, y):
+    def __init__(self, x, y, index):
         self.x = x
         self.y = y
+        self.index = index
 
     def distance(self, city):
         xDis = abs(self.x - city.x)
@@ -25,8 +26,10 @@ class Fitness:
         self.route = route
         self.distance = 0
         self.fitness = 0.0
+        # self.adjMatrix = adjMatrix
 
     def routeDistance(self):
+        global adjMatrix
         if self.distance == 0:
             pathDistance = 0
             for i in range(0, len(self.route)):
@@ -36,7 +39,8 @@ class Fitness:
                     toCity = self.route[i + 1]
                 else:
                     toCity = self.route[0]
-                pathDistance += fromCity.distance(toCity)
+                # pathDistance += fromCity.distance(toCity)
+                pathDistance += adjMatrix[fromCity.index-1, toCity.index-1]
             self.distance = pathDistance
         return self.distance
 
@@ -52,6 +56,16 @@ def createRoute(cityList):
     # route = random.sample(cityList, len(cityList))
     return route
 
+def createAdjMatrix(cityList):
+    n = len(cityList)
+    adjacency = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            if i!=j:
+                adjacency[i,j] = cityList[i].distance(cityList[j])
+
+    return adjacency
+            
 
 def initialPopulation(popSize, cityList):
     population = []
@@ -167,7 +181,7 @@ def plotRoute(bestRoute, title=""):
     # plot best initial route
     plt.plot(bestRoute[:, 0], bestRoute[:, 1], marker='o')
     plt.title(title)
-    plt.show()
+    # plt.show()
 
 
 def geneticAlgorithm(population, popSize, eliteSize, generations):
@@ -200,10 +214,27 @@ def geneticAlgorithm(population, popSize, eliteSize, generations):
     plt.plot(progress)
     plt.ylabel('Distance')
     plt.xlabel('Generation')
-    plt.show()
+    # plt.show()
 
     return bestRoute
 
 
+dailyRoute = []
+dailyRoute.append(City(1000, 500,1))
+dailyRoute.append(City(250, 400,2))
+dailyRoute.append(City(1000, 600,3))
+dailyRoute.append(City(900, 350,4))
+dailyRoute.append(City(550, 100,5))
+dailyRoute.append(City(800, 500,6))
+
+adjMatrix = createAdjMatrix(dailyRoute)
 
 
+from timeit import default_timer as timer
+
+tick = timer()
+
+geneticAlgorithm(population=dailyRoute, popSize=10,
+                 eliteSize=5, generations=4)
+tock = timer()
+print(tock-tick)
