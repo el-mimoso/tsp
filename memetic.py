@@ -181,10 +181,12 @@ def plotRoute(bestRoute, title=""):
     # plot best initial route
     plt.plot(bestRoute[:, 0], bestRoute[:, 1], marker='o')
     plt.title(title)
+    plt.savefig(f'figures/{title}.pdf')
+    plt.close()
     # plt.show()
 
 
-def geneticAlgorithm(population, popSize, eliteSize, generations):
+def geneticAlgorithm(population, popSize, eliteSize, generations, title=""):
     pop = initialPopulation(popSize, population)
     progress = []
 
@@ -196,7 +198,7 @@ def geneticAlgorithm(population, popSize, eliteSize, generations):
     bestRouteIndex = rankRoutes(pop)[0][0]
     bestRoute = pop[bestRouteIndex]
     # print(bestRoute)
-    plotRoute(bestRoute, "Best Initial Route")
+    plotRoute(bestRoute, f"{title}`s Best Initial Route")
 
     for i in range(0, generations):
         print(f"Current gen {i}")
@@ -209,32 +211,36 @@ def geneticAlgorithm(population, popSize, eliteSize, generations):
     bestRouteIndex = rankRoutes(pop)[0][0]
     bestRoute = pop[bestRouteIndex]
 
-    plotRoute(bestRoute, "Best Found Route")
+    plotRoute(bestRoute, f"{title}`s Best Found Route")
 
     plt.plot(progress)
     plt.ylabel('Distance')
     plt.xlabel('Generation')
+    plt.savefig(f"figures/{title}_progress.pdf")
+    plt.close()
     # plt.show()
 
     return bestRoute
 
 
-dailyRoute = []
-dailyRoute.append(City(1000, 500,1))
-dailyRoute.append(City(250, 400,2))
-dailyRoute.append(City(1000, 600,3))
-dailyRoute.append(City(900, 350,4))
-dailyRoute.append(City(550, 100,5))
-dailyRoute.append(City(800, 500,6))
 
-adjMatrix = createAdjMatrix(dailyRoute)
+data = pd.read_csv('benchmarks/d15112.tsp', skiprows=[0, 1, 2, 3, 4, 5],
+                   header=None, sep=' ')[:-1]
+data=data.rename(columns={0:"ID",1:"x",2:"y"})
 
+cityList = [] 
+for i in range (len (data.x.values)):
+    cityList.append(City(data.x[i], data.y[i],int(data.ID[i])))
+ruta = createRoute(cityList)
+
+
+adjMatrix = createAdjMatrix(cityList)
 
 from timeit import default_timer as timer
 
 tick = timer()
 
-geneticAlgorithm(population=dailyRoute, popSize=10,
-                 eliteSize=5, generations=4)
+geneticAlgorithm(population=cityList, popSize=10,
+                 eliteSize=5, generations=4, title="d15112")
 tock = timer()
 print(tock-tick)
