@@ -1,8 +1,9 @@
+from timeit import default_timer as timer
 import numpy as np
 import random
 import operator
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 class City:
@@ -56,16 +57,17 @@ def createRoute(cityList):
     # route = random.sample(cityList, len(cityList))
     return route
 
+
 def createAdjMatrix(cityList):
     n = len(cityList)
     adjacency = np.zeros((n, n))
     for i in range(n):
         for j in range(n):
-            if i!=j:
-                adjacency[i,j] = cityList[i].distance(cityList[j])
+            if i != j:
+                adjacency[i, j] = cityList[i].distance(cityList[j])
 
     return adjacency
-            
+
 
 def initialPopulation(popSize, cityList):
     population = []
@@ -98,12 +100,14 @@ def selection(popRanked, eliteSize):
                 break
     return selectionResults
 
+
 def matingPool(population, selectionResults):
     matingpool = []
     for i in range(0, len(selectionResults)):
         index = selectionResults[i]
         matingpool.append(population[index])
     return matingpool
+
 
 def breed(parent1, parent2):
     child = []
@@ -124,6 +128,7 @@ def breed(parent1, parent2):
     child = childP1 + childP2
     return child
 
+
 def breedPopulation(matingpool, eliteSize):
     children = []
     length = len(matingpool) - eliteSize
@@ -137,22 +142,23 @@ def breedPopulation(matingpool, eliteSize):
         children.append(child)
     return children
 
+
 def mutate(individual):
     best = individual
     improved = True
     n = len(individual)
     while improved:
-            improved = False
-            for i in range(1, n-1):
-                for j in range(i+1, n-1):
-                    if j-i == 1:
-                        continue
-                    new_individual = individual[:]
-                    # this is the 2woptSwap
-                    new_individual[i:j] = individual[j-1:i-1:-1]
-                    if Fitness(new_individual).routeDistance() < Fitness(best).routeDistance():
-                        best = new_individual
-                        improved = True
+        improved = False
+        for i in range(1, n-1):
+            for j in range(i+1, n-1):
+                if j-i == 1:
+                    continue
+                new_individual = individual[:]
+                # this is the 2woptSwap
+                new_individual[i:j] = individual[j-1:i-1:-1]
+                if Fitness(new_individual).routeDistance() < Fitness(best).routeDistance():
+                    best = new_individual
+                    improved = True
     individual = best
     return best
 
@@ -165,6 +171,7 @@ def mutatePopulation(population):
         mutatedPop.append(mutatedInd)
     return mutatedPop
 
+
 def nextGeneration(currentGen, eliteSize):
     popRanked = rankRoutes(currentGen)
     selectionResults = selection(popRanked, eliteSize)
@@ -174,16 +181,16 @@ def nextGeneration(currentGen, eliteSize):
     return nextGeneration
 
 
-def plotRoute(bestRoute, title=""):
-    bestRoute.append(bestRoute[0])
-    bestRoute = np.array([list([i.x, i.y])for i in bestRoute])
+# def plotRoute(bestRoute, title=""):
+#     bestRoute.append(bestRoute[0])
+#     bestRoute = np.array([list([i.x, i.y])for i in bestRoute])
 
-    # plot best initial route
-    plt.plot(bestRoute[:, 0], bestRoute[:, 1], marker='o')
-    plt.title(title)
-    plt.savefig(f'figures/{title}.pdf')
-    plt.close()
-    # plt.show()
+#     # plot best initial route
+#     plt.plot(bestRoute[:, 0], bestRoute[:, 1], marker='o')
+#     plt.title(title)
+#     plt.savefig(f'figures/{title}.pdf')
+#     plt.close()
+#     # plt.show()
 
 
 def geneticAlgorithm(population, popSize, eliteSize, generations, title=""):
@@ -197,8 +204,9 @@ def geneticAlgorithm(population, popSize, eliteSize, generations, title=""):
     # Best first route
     bestRouteIndex = rankRoutes(pop)[0][0]
     bestRoute = pop[bestRouteIndex]
+    bestInitial = bestRoute
     # print(bestRoute)
-    plotRoute(bestRoute, f"{title}`s Best Initial Route")
+    # plotRoute(bestRoute, f"{title}`s Best Initial Route")
 
     for i in range(0, generations):
         print(f"Current gen {i}")
@@ -211,36 +219,52 @@ def geneticAlgorithm(population, popSize, eliteSize, generations, title=""):
     bestRouteIndex = rankRoutes(pop)[0][0]
     bestRoute = pop[bestRouteIndex]
 
-    plotRoute(bestRoute, f"{title}`s Best Found Route")
+    # plotRoute(bestRoute, f"{title}`s Best Found Route")
 
-    plt.plot(progress)
-    plt.ylabel('Distance')
-    plt.xlabel('Generation')
-    plt.savefig(f"figures/{title}_progress.pdf")
-    plt.close()
+    # plt.plot(progress)
+    # plt.ylabel('Distance')
+    # plt.xlabel('Generation')
+    # plt.savefig(f"figures/{title}_progress.pdf")
+    # plt.close()
     # plt.show()
 
-    return bestRoute
+    return bestInitial, bestRoute, progress
 
 
+def saveFile(bestInitial, globalBest, progress, timer, title):
+    file = open(title, 'w')
+    file.write('initial = '+str(bestInitial))
+    file.write('\n')
+    file.write('globalBest = '+str(globalBest))
+    file.write('\n')
+    file.write('progress = '+str(progress))
+    file.write('\n')
+    file.write('time = '+str(timer))
+    file.write('\n')
+    file.close()
+    print('saved to: ' + title)
 
-data = pd.read_csv('benchmarks/d15112.tsp', skiprows=[0, 1, 2, 3, 4, 5],
+
+# Load Data
+data = pd.read_csv('kroA100.tsp', skiprows=[0, 1, 2, 3, 4, 5],
                    header=None, sep=' ')[:-1]
-data=data.rename(columns={0:"ID",1:"x",2:"y"})
+data = data.rename(columns={0: "ID", 1: "x", 2: "y"})
 
-cityList = [] 
-for i in range (len (data.x.values)):
-    cityList.append(City(data.x[i], data.y[i],int(data.ID[i])))
+cityList = []
+for i in range(len(data.x.values)):
+    cityList.append(City(data.x[i], data.y[i], int(data.ID[i])))
 ruta = createRoute(cityList)
 
 
 adjMatrix = createAdjMatrix(cityList)
 
-from timeit import default_timer as timer
 
 tick = timer()
-
-geneticAlgorithm(population=cityList, popSize=10,
-                 eliteSize=5, generations=4, title="d15112")
+bi, gB, progress = geneticAlgorithm(
+    population=cityList, popSize=10, eliteSize=5, generations=4)
 tock = timer()
-print(tock-tick)
+exeTime = tock-tick
+print(exeTime)
+
+saveFile(bestInitial=bi, globalBest=gB, progress=progress,
+         timer=exeTime, title="KrooaTest")
