@@ -122,12 +122,14 @@ def breed(parent1, parent2):
     startGene = min(geneA, geneB)
     endGene = max(geneA, geneB)
 
+    childP1.insert(0,ini)
     for i in range(startGene, endGene):
         childP1.append(parent1[i])
 
     childP2 = [item for item in parent2 if item not in childP1]
 
     child = childP1 + childP2
+    child.append(ini)
     return child
 
 
