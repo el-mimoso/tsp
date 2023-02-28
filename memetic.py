@@ -54,6 +54,7 @@ class Fitness:
 def createRoute(cityList):
     route = random.sample(cityList[1:], len(cityList)-1)
     route.insert(0, cityList[0])
+    route.append(cityList[0])
     # route = random.sample(cityList, len(cityList))
     return route
 
@@ -110,12 +111,13 @@ def matingPool(population, selectionResults):
 
 
 def breed(parent1, parent2):
+    ini = parent1[0]
     child = []
     childP1 = []
     childP2 = []
-
-    geneA = int(random.random() * len(parent1))
-    geneB = int(random.random() * len(parent1))
+    # geneA = int(random.random() * len(parent1))
+    geneA = int(random.randrange(1 ,len(parent1)-1))
+    geneB = int(random.randrange(1, len(parent1)-1))
 
     startGene = min(geneA, geneB)
     endGene = max(geneA, geneB)
@@ -145,22 +147,15 @@ def breedPopulation(matingpool, eliteSize):
 
 def mutate(individual):
     best = individual
-    improved = True
-    n = len(individual)
-    while improved:
-        improved = False
-        for i in range(1, n-1):
-            for j in range(i+1, n-1):
-                if j-i == 1:
-                    continue
-                new_individual = individual[:]
-                # this is the 2woptSwap
-                new_individual[i:j] = individual[j-1:i-1:-1]
-                if Fitness(new_individual).routeDistance() < Fitness(best).routeDistance():
+    new_individual = individual 
+    i, j = random.sample(range(len(new_individual)), 2)
+    i, j = min(i, j), max(i, j)
+    new_individual = new_individual[:i] + \
+        new_individual[i:j+1][::-1] + new_individual[j+1:]
+    if Fitness(new_individual).routeDistance() < Fitness(best).routeDistance():
                     best = new_individual
-                    improved = True
-    individual = best
     return best
+
 
 
 def mutatePopulation(population):
@@ -215,8 +210,8 @@ def geneticAlgorithm(population, popSize, eliteSize, generations, adjMat):
         pop = nextGeneration(pop, eliteSize)
         progress.append(1 / rankRoutes(pop)[0][1])
         print(f"current best : {1 / rankRoutes(pop)[0][1]}")
-        if i > 3 and progress[i-3] == progress[i]:
-            break
+        # if i > 3 and progress[i-3] == progress[i]:
+        #     break
 
     # Best final route.
     print("Final distance: " + str(1 / rankRoutes(pop)[0][1]))

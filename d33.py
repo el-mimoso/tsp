@@ -1,6 +1,6 @@
 from memetic import *
 # Load Data
-data = pd.read_csv('kroA100.tsp', skiprows=[0, 1, 2, 3, 4, 5],
+data = pd.read_csv('benchmarks\pla33810.tsp', skiprows=[0, 1, 2, 3, 4, 5],
                    header=None, sep=' ')[:-1]
 data = data.rename(columns={0: "ID", 1: "x", 2: "y"})
 
@@ -13,7 +13,7 @@ adjMatrix = createAdjMatrix(cityList)
 # initiate
 tick = timer()
 bi, gB, progress = geneticAlgorithm(
-    population=cityList, popSize=50, eliteSize=25, generations=200, adjMat=adjMatrix)
+    population=cityList, popSize=50, eliteSize=25, generations=1000, adjMat=adjMatrix)
 tock = timer()
 exeTime = tock-tick
 print(f"time: {exeTime}")
