@@ -1,6 +1,6 @@
 from memetic import *
 # Load Data
-data = pd.read_csv('benchmarks\pla33810.tsp', skiprows=[0, 1, 2, 3, 4, 5],
+data = pd.read_csv('benchmarks/pla33810.tsp', skiprows=[0, 1, 2, 3, 4, 5],
                    header=None, sep=' ')[:-1]
 data = data.rename(columns={0: "ID", 1: "x", 2: "y"})
 
@@ -19,4 +19,4 @@ exeTime = tock-tick
 print(f"time: {exeTime}")
 # Save to File
 saveFile(bestInitial=bi, globalBest=gB, progress=progress,
-         timer=exeTime, title="kroaTEst")
+         timer=exeTime, title="d33V1")
