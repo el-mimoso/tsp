@@ -98,8 +98,11 @@ def createPopulation():
 
 def calcDistance(curr_order):
     sum = 0
-    for i in range(0, len(curr_order) - 1):
-        d = cities[curr_order[i]][curr_order[i + 1]]
+    for i in range(0, len(curr_order)):
+        if i+1 < len(curr_order):
+            d = cities[curr_order[i]] [curr_order[i + 1]]
+        else:
+            d = cities[curr_order[i]] [curr_order[i]]
         sum += d
     return sum
 
@@ -224,7 +227,7 @@ if __name__ == "__main__":
     # print(population)
     a = 0
 
-    while a < 10:
+    while a < 200:
         calcFitness()
         print(f"Generation: {a}")
         nextGeneration()
